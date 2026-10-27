@@ -2,7 +2,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { advance, choose, createInitialProgress, finishInterlude, getCurrentEntry, isValidProgress } from './engine.js';
+import {
+  advance,
+  buildDialogueHistory,
+  choose,
+  createInitialProgress,
+  finishInterlude,
+  getCurrentEntry,
+  getCurrentScene,
+  getStageCharacters,
+  isValidProgress,
+} from './engine.js';
 import { CHAPTER_LIST, CHAPTERS } from './registry.js';
 
 test('every spoken line has an existing portrait for its speaker and expression', () => {
@@ -200,4 +210,40 @@ test('all chapters in CHAPTER_LIST can be started directly', () => {
     assert.equal(progress.phase, 'story');
     assert.ok(getCurrentEntry(progress), `chapter ${chapter.id} has an opening entry`);
   }
+});
+
+test('buildDialogueHistory reconstructs lines and choices up to current progress', () => {
+  let progress = createInitialProgress('chapter-01');
+  progress = advance(progress);
+  progress = advance(progress);
+  const history = buildDialogueHistory(progress);
+  assert.equal(history.length, 3);
+  assert.equal(history[0].mode, 'narration');
+  assert.equal(history[1].mode, 'thought');
+  assert.equal(history[2].mode, 'dialogue');
+  assert.equal(history[2].speaker, 'André');
+  assert.equal(history[2].isCurrent, true);
+});
+
+test('getStageCharacters tracks protagonist on left and active interlocutor on right', () => {
+  const chapter = CHAPTERS['chapter-01'];
+  let progress = createInitialProgress('chapter-01');
+  let chars = getStageCharacters(chapter, getCurrentScene(progress), progress);
+  assert.equal(chars.left?.name, 'André');
+  assert.equal(chars.right, null);
+
+  // Advance to line 5 where Mãe speaks
+  for (let i = 0; i < 5; i += 1) progress = advance(progress);
+  chars = getStageCharacters(chapter, getCurrentScene(progress), progress);
+  assert.equal(chars.left?.name, 'André');
+  assert.equal(chars.left?.active, false);
+  assert.equal(chars.right?.name, 'Mãe');
+  assert.equal(chars.right?.active, true);
+
+  // Next line André replies while Mãe remains on stage listening
+  progress = advance(progress);
+  chars = getStageCharacters(chapter, getCurrentScene(progress), progress);
+  assert.equal(chars.left?.active, true);
+  assert.equal(chars.right?.name, 'Mãe');
+  assert.equal(chars.right?.active, false);
 });

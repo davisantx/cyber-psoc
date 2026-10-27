@@ -15,6 +15,8 @@ test('preferences persist and invalid fields fall back safely', () => {
   assert.deepEqual(readPreferences(storage), DEFAULT_PREFERENCES);
   assert.equal(writePreferences({ textSpeed: 'rapida', reducedMotion: true, masterVolume: 45, musicVolume: 120, effectsVolume: 30 }, storage), true);
   assert.deepEqual(readPreferences(storage), { textSpeed: 'rapida', reducedMotion: true, masterVolume: 45, musicVolume: 100, effectsVolume: 30 });
+  assert.equal(writePreferences({ textSpeed: 'instantanea', textScale: 'projetor', reducedMotion: false, masterVolume: 80, musicVolume: 60, effectsVolume: 70 }, storage), true);
+  assert.deepEqual(readPreferences(storage), { textSpeed: 'instantanea', textScale: 'projetor', reducedMotion: false, masterVolume: 80, musicVolume: 60, effectsVolume: 70 });
   storage.setItem(PREFERENCES_KEY, '{broken');
   assert.deepEqual(readPreferences(storage), DEFAULT_PREFERENCES);
 });

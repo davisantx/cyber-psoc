@@ -40,7 +40,7 @@ export default function InterludeScreen({ progress, scene, reducedMotion, onProg
           <button className="interlude-screen__skip" type="button" onClick={onOpenChapters}>CAPÍTULOS</button>
         )}
         <button className="interlude-screen__skip" type="button" onClick={finish}>
-          {nextChapter ? `AVANÇAR PARA CAPÍTULO ${nextChapter.number} ›` : 'PULAR TRANSIÇÃO'}
+          {nextChapter ? `AVANÇAR PARA CAPÍTULO ${nextChapter.number}` : 'PULAR TRANSIÇÃO'}
         </button>
       </div>
     </main>

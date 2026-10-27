@@ -13,9 +13,9 @@ export default function NextChapterPlaceholder({ chapter, nextChapter, onContinu
           ? `A história de ${chapter.protagonist.name} terminou. O Capítulo ${nextChapter.number}, “${nextChapter.title}”, acompanha ${nextChapter.protagonist.name}.`
           : `A história de ${chapter.protagonist.name} chegou ao fim. Você pode revisitar qualquer um dos três capítulos para explorar outras escolhas e desfechos.`}</p>
         <div className="next-chapter-screen__actions">
-          {nextChapter && <button className="return-button" type="button" onClick={onContinue} ref={continueRef}>INICIAR CAPÍTULO {nextChapter.number} →</button>}
+          {nextChapter && <button className="return-button return-button--primary" type="button" onClick={onContinue} ref={continueRef}>INICIAR CAPÍTULO {nextChapter.number}</button>}
           {onOpenChapters && <button className="return-button" type="button" onClick={onOpenChapters}>ESCOLHER CAPÍTULO</button>}
-          <button className="return-button" type="button" onClick={onBack} ref={backRef}>← VOLTAR AO MENU</button>
+          <button className="return-button" type="button" onClick={onBack} ref={backRef}>VOLTAR AO MENU</button>
         </div>
       </div>
     </main>

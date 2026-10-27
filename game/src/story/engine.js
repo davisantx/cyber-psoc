@@ -103,6 +103,134 @@ export function finishInterlude(progress) {
   return { ...progress, phase: 'awaitingNext', updatedAt: Date.now() };
 }
 
+export function buildDialogueHistory(progress) {
+  if (!progress) return [];
+  const chapter = getChapter(progress.chapterId);
+  if (!chapter) return [];
+
+  const history = [];
+  let cursor = createInitialProgress(progress.chapterId);
+  let choiceCursor = 0;
+
+  for (let steps = 0; steps < 400; steps += 1) {
+    const scene = getCurrentScene(cursor);
+    const entry = getCurrentEntry(cursor);
+    if (!scene || !entry) break;
+
+    const isTarget =
+      cursor.sceneId === progress.sceneId &&
+      cursor.entryIndex === progress.entryIndex &&
+      cursor.phase === progress.phase;
+
+    if (entry.type === 'line') {
+      history.push({
+        id: `${cursor.sceneId}:${cursor.entryIndex}`,
+        sceneId: cursor.sceneId,
+        act: scene.act,
+        setting: scene.setting,
+        type: 'line',
+        mode: entry.mode,
+        speaker: entry.speaker,
+        expression: entry.expression,
+        text: entry.text,
+        isCurrent: isTarget,
+      });
+      if (isTarget) break;
+      cursor = advance(cursor);
+    } else if (entry.type === 'choice') {
+      if (isTarget) break;
+      const recorded =
+        progress.choices.find(
+          (c, idx) => idx >= choiceCursor && c.sceneId === cursor.sceneId && c.entryIndex === cursor.entryIndex
+        ) ?? progress.choices[choiceCursor];
+      if (!recorded) break;
+      choiceCursor += 1;
+      const chosenOption = entry.options.find((opt) => opt.id === recorded.optionId);
+      history.push({
+        id: `${cursor.sceneId}:${cursor.entryIndex}:choice`,
+        sceneId: cursor.sceneId,
+        act: scene.act,
+        setting: scene.setting,
+        type: 'choice',
+        mode: 'choice',
+        speaker: chapter.protagonist.name,
+        prompt: entry.prompt,
+        chosenLabel: chosenOption?.label ?? recorded.optionId,
+        isCurrent: false,
+      });
+      cursor = choose(cursor, recorded.optionId);
+    } else {
+      break;
+    }
+  }
+
+  return history;
+}
+
+export function getStageCharacters(chapter, scene, progress) {
+  if (!chapter || !scene || !progress) return { left: null, right: null };
+  const protagonistName = chapter.protagonist.name;
+  const protagonistPortraits = chapter.assets.portraits ?? {};
+  const supportingMap = chapter.assets.supportingPortraits ?? {};
+
+  let lastProtagonistExpr = 'normal';
+  let lastSupportingSpeaker = null;
+  let lastSupportingExpr = 'normal';
+
+  const maxIdx = Math.min(progress.entryIndex, scene.entries.length - 1);
+  for (let i = 0; i <= maxIdx; i += 1) {
+    const item = scene.entries[i];
+    if (!item || !matchesCondition(item.when, progress.variables)) continue;
+    if (item.type === 'choice') {
+      lastProtagonistExpr = 'pensativo';
+    } else if (item.type === 'line') {
+      if (item.speaker === protagonistName && item.expression) {
+        lastProtagonistExpr = item.expression;
+      } else if (item.speaker && supportingMap[item.speaker]) {
+        lastSupportingSpeaker = item.speaker;
+        lastSupportingExpr = item.expression ?? 'normal';
+      }
+    }
+  }
+
+  const entry = scene.entries[progress.entryIndex];
+  const isProtagonistSpeaking =
+    entry?.type === 'choice' ||
+    (entry?.type === 'line' && entry.speaker === protagonistName);
+  const isSupportingSpeaking =
+    entry?.type === 'line' &&
+    entry.mode === 'dialogue' &&
+    Boolean(entry.speaker && supportingMap[entry.speaker]);
+
+  const leftSrc = protagonistPortraits[lastProtagonistExpr] ?? protagonistPortraits.normal ?? null;
+  const left = leftSrc
+    ? {
+        name: protagonistName,
+        role: 'protagonist',
+        expression: lastProtagonistExpr,
+        src: leftSrc,
+        active: isProtagonistSpeaking,
+      }
+    : null;
+
+  let right = null;
+  if (lastSupportingSpeaker && supportingMap[lastSupportingSpeaker]) {
+    const portraits = supportingMap[lastSupportingSpeaker];
+    const rightSrc = portraits[lastSupportingExpr] ?? portraits.normal ?? null;
+    if (rightSrc) {
+      right = {
+        name: lastSupportingSpeaker,
+        role: 'supporting',
+        expression: lastSupportingExpr,
+        src: rightSrc,
+        active: isSupportingSpeaking,
+      };
+    }
+  }
+
+  return { left, right };
+}
+
 export function isValidProgress(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const chapter = getChapter(value.chapterId);

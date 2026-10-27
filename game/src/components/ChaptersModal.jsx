@@ -32,7 +32,7 @@ export default function ChaptersModal({
     <ModalShell
       title="Selecionar Capítulo"
       label="seleção de capítulos"
-      returnLabel={inStory ? '← VOLTAR À HISTÓRIA' : '← VOLTAR AO MENU'}
+      returnLabel={inStory ? 'VOLTAR À HISTÓRIA' : 'VOLTAR AO MENU'}
       wide
       onClose={onClose}
     >
@@ -113,7 +113,7 @@ export default function ChaptersModal({
                           onContinueSaved();
                         }}
                       >
-                        CONTINUAR DE ONDE PAROU →
+                        CONTINUAR DE ONDE PAROU
                       </button>
                       {hasAdvancedInChapter && (
                         <button
@@ -160,7 +160,7 @@ export default function ChaptersModal({
                         onSelectChapter(chapter.id);
                       }}
                     >
-                      {inStory ? `PULAR PARA CAPÍTULO ${chapter.number} →` : `INICIAR CAPÍTULO ${chapter.number} →`}
+                      {inStory ? `IR PARA CAPÍTULO ${chapter.number}` : `INICIAR CAPÍTULO ${chapter.number}`}
                     </button>
                   )}
                 </div>

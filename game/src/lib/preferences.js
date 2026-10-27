@@ -11,15 +11,22 @@ export const DEFAULT_PREFERENCES = Object.freeze({
 const clampVolume = (value, fallback) =>
   Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback;
 
+export const TEXT_SPEED_OPTIONS = Object.freeze(['lenta', 'normal', 'rapida', 'instantanea']);
+export const TEXT_SCALE_OPTIONS = Object.freeze(['padrao', 'grande', 'projetor']);
+
 export function normalizePreferences(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return { ...DEFAULT_PREFERENCES };
-  return {
+  const normalized = {
     masterVolume: clampVolume(value.masterVolume, DEFAULT_PREFERENCES.masterVolume),
     musicVolume: clampVolume(value.musicVolume, DEFAULT_PREFERENCES.musicVolume),
     effectsVolume: clampVolume(value.effectsVolume, DEFAULT_PREFERENCES.effectsVolume),
-    textSpeed: ['lenta', 'normal', 'rapida'].includes(value.textSpeed) ? value.textSpeed : 'normal',
+    textSpeed: TEXT_SPEED_OPTIONS.includes(value.textSpeed) ? value.textSpeed : 'normal',
     reducedMotion: typeof value.reducedMotion === 'boolean' ? value.reducedMotion : null,
   };
+  if (TEXT_SCALE_OPTIONS.includes(value.textScale)) {
+    normalized.textScale = value.textScale;
+  }
+  return normalized;
 }
 
 export function readPreferences(storage = globalThis.localStorage) {

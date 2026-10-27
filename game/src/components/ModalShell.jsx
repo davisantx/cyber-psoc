@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-export default function ModalShell({ title, label, onClose, returnLabel = '← VOLTAR AO MENU', wide = false, children }) {
+export default function ModalShell({ title, label, onClose, returnLabel = 'VOLTAR AO MENU', wide = false, children }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
