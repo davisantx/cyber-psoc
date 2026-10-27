@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste de Sprites - Projeto Social</title>
+  <style>
+    :root {
+      --bg-page: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: var(--bg-card);
+      padding: 18px 24px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .bg-switcher, .char-switcher {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .bg-switcher span, .char-switcher span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    .btn {
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    /* Fundos de teste */
+    .preview-bg-scene {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 55%, #1e293b 100%);
+    }
+
+    .preview-bg-checker {
+      background-color: #cbd5e1;
+      background-image:
+        linear-gradient(45deg, #94a3b8 25%, transparent 25%),
+        linear-gradient(-45deg, #94a3b8 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #94a3b8 75%),
+        linear-gradient(-45deg, transparent 75%, #94a3b8 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    }
+
+    .preview-bg-light {
+      background: #f8fafc;
+    }
+
+    .preview-bg-green {
+      background: #22c55e;
+    }
+
+    /* Simulador de Jogo / Diálogo */
+    .simulator-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .simulator-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .game-stage {
+      position: relative;
+      height: 540px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      user-select: none;
+    }
+
+    /* Corpo inteiro ao fundo */
+    .stage-fullbody-wrap {
+      position: absolute;
+      right: 48px;
+      top: 20px;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .stage-fullbody-wrap img {
+      max-height: 100%;
+      width: auto;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
+    }
+
+    /* Caixa de diálogo estilo RPG / Visual Novel */
+    .vn-hud {
+      position: relative;
+      z-index: 2;
+      margin: 0 20px 20px 20px;
+    }
+
+    /* Retrato encaixado na base superior da caixa de diálogo */
+    .portrait-slot {
+      width: 240px;
+      height: 310px;
+      margin-left: 24px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+    }
+
+    .portrait-slot.show-guides {
+      outline: 1px dashed rgba(56, 189, 248, 0.7);
+      background: rgba(56, 189, 248, 0.06);
+    }
+
+    .portrait-slot.show-guides::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      border-left: 1px dashed rgba(244, 63, 94, 0.65);
+      pointer-events: none;
+    }
+
+    .portrait-slot img {
+      height: 100%;
+      width: auto;
+      display: block;
+    }
+
+    .dialogue-box {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--accent);
+      border-radius: 14px;
+      padding: 18px 22px;
+      min-height: 120px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dialogue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .speaker-name {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .emotion-badge {
+      font-size: 0.78rem;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .dialogue-text {
+      font-size: 1.05rem;
+      color: #f1f5f9;
+      min-height: 2.8em;
+    }
+
+    .dialogue-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 6px;
+    }
+
+    /* Painel de controle lateral */
+    .control-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-panel h2 {
+      font-size: 1.05rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .expression-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .expr-btn {
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.84rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.12s ease;
+    }
+
+    .expr-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .expr-btn.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .expr-num {
+      font-size: 0.74rem;
+      opacity: 0.65;
+      min-width: 18px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+
+    .options-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .options-list input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Galeria de todos os 13 recortes */
+    .gallery-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .gallery-section h2 {
+      font-size: 1.15rem;
+      margin-bottom: 6px;
+    }
+
+    .gallery-section > p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .sprite-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .sprite-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .sprite-card-preview {
+      height: 260px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      padding-top: 12px;
+    }
+
+    .sprite-card-preview.fullbody-preview {
+      align-items: center;
+      padding: 12px;
+    }
+
+    .sprite-card-preview img {
+      max-height: 100%;
+      max-width: 100%;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+
+    .sprite-card-info {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .sprite-card-info code {
+      color: var(--accent);
+      font-size: 0.78rem;
+    }
+
+    .sprite-card-info span {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>🎮 Teste Interativo de Sprites</h1>
+        <p>Use os botões ou as setas do teclado (<strong>←</strong> / <strong>→</strong>) para testar a troca de expressões sem perda de qualidade.</p>
+      </div>
+      <div class="toolbar-group">
+        <div class="char-switcher">
+          <span>Personagem:</span>
+          <button class="btn" data-char="char1">Personagem 1</button>
+          <button class="btn" data-char="char2">Personagem 2</button>
+          <button class="btn" data-char="char3">Personagem 3</button>
+          <button class="btn" data-char="char4">Personagem 4</button>
+          <button class="btn" data-char="char5">Personagem 5</button>
+          <button class="btn" data-char="char6">Personagem 6</button>
+          <button class="btn" data-char="char7">Personagem 7</button>
+          <button class="btn" data-char="char8">Personagem 8</button>
+          <button class="btn" data-char="char9">Personagem 9</button>
+          <button class="btn active" data-char="char10">Personagem 10</button>
+        </div>
+        <div class="bg-switcher">
+          <span>Fundo:</span>
+          <button class="btn active" data-bg="preview-bg-scene">Cena Escura</button>
+          <button class="btn" data-bg="preview-bg-checker">Xadrez (Transparência)</button>
+          <button class="btn" data-bg="preview-bg-light">Fundo Branco</button>
+          <button class="btn" data-bg="preview-bg-green">Chroma Key</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="simulator-grid">
+      <!-- Palco do jogo -->
+      <div id="gameStage" class="game-stage preview-bg-scene">
+        <div id="fullbodyWrap" class="stage-fullbody-wrap">
+          <img id="fullbodyImg" src="sprites_recortados_10/00_corpo_inteiro.png" alt="Personagem Corpo Inteiro" />
+        </div>
+
+        <div class="vn-hud">
+          <div id="portraitSlot" class="portrait-slot">
+            <img id="activeExpressionImg" src="sprites_recortados_10/01_normal.png" alt="Expressão Atual" />
+          </div>
+          <div class="dialogue-box">
+            <div>
+              <div class="dialogue-header">
+                <span id="speakerName" class="speaker-name">Personagem 10</span>
+                <span id="activeEmotionBadge" class="emotion-badge">01_normal.png (240×350)</span>
+              </div>
+              <p id="dialogueText" class="dialogue-text">
+                Olá! Aqui você pode testar como o meu rosto troca de expressão dentro do jogo sem pular do lugar.
+              </p>
+            </div>
+            <div class="dialogue-hint">Dica: Pressione ← ou → no teclado para alternar rapidamente</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controles -->
+      <aside class="control-panel">
+        <h2 id="panelTitle">Expressões (240 × 350 px)</h2>
+        <div id="expressionButtons" class="expression-buttons"></div>
+
+        <div class="options-list">
+          <label>
+            <input type="checkbox" id="toggleFullbody" checked />
+            Mostrar sprite de corpo inteiro ao fundo
+          </label>
+          <label>
+            <input type="checkbox" id="toggleGuides" />
+            Mostrar linhas-guia de alinhamento
+          </label>
+          <label>
+            <input type="checkbox" id="toggleAutoCycle" />
+            Alternar expressões automaticamente (1.2s)
+          </label>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Galeria com todos os 13 arquivos -->
+    <section class="gallery-section">
+      <h2>📁 Todos os 13 Recortes do Personagem Selecionado</h2>
+      <p>Clique em qualquer card abaixo para carregá-lo imediatamente no simulador acima.</p>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </section>
+  </div>
+
+  <script>
+    const characters = {
+      char1: {
+        name: 'Personagem 1',
+        dir: 'sprites_recortados',
+        stdSize: '220×310',
+        fullbodySize: '375×1428',
+        expressions: [
+          { id: '01', label: 'Normal', file: '01_normal.png', line: 'Olá! Aqui você pode testar como o meu rosto troca de expressão dentro do jogo sem pular do lugar.' },
+          { id: '02', label: 'Feliz', file: '02_feliz.png', line: 'Que ótimo! Os recortes ficaram super limpos e prontos para o nosso projeto social!' },
+          { id: '03', label: 'Triste', file: '03_triste.png', line: 'Poxa... às vezes as coisas ficam difíceis, mas não podemos desistir agora.' },
+          { id: '04', label: 'Bravo', file: '04_bravo.png', line: 'Não vou deixar que isso aconteça. Precisamos agir com firmeza!' },
+          { id: '05', label: 'Surpreso', file: '05_surpreso.png', line: 'Espera aí... você está dizendo que conseguimos resolver tudo sem perder nada de qualidade?!' },
+          { id: '06', label: 'Constrangido', file: '06_constrangido.png', line: 'Ah... bom, eu fiz o melhor que pude para ajudar a equipe...' },
+          { id: '07', label: 'Pensativo', file: '07_pensativo.png', line: 'Hmm... se analisarmos por esse lado, qual será a melhor decisão para a próxima fase?' },
+          { id: '08', label: 'Rindo', file: '08_rindo.png', line: 'Hahaha! Essa foi muito boa, valeu demais pela parceria!' },
+          { id: '09', label: 'Com raiva', file: '09_com_raiva.png', line: 'Já chega! Isso passou de todos os limites!' },
+          { id: '10', label: 'Olhando (esq.)', file: '10_olhando_esquerda.png', line: '(Olhando para a esquerda) Parece que tem alguém vindo por ali...' },
+          { id: '11', label: 'Olhando (dir.)', file: '11_olhando_direita.png', line: '(Olhando para a direita) Vamos conferir o que tem daquele lado da cena.' },
+          { id: '12', label: 'De costas', file: '12_de_costas.png', line: '...' }
+        ]
+      },
+      char2: {
+        name: 'Personagem 2',
+        dir: 'sprites_recortados_2',
+        stdSize: '240×310',
+        fullbodySize: '348×1423',
+        expressions: [
+          { id: '01', label: 'Normal', file: '01_normal.png', line: 'Olá! Aqui você pode testar como o meu rosto troca de expressão dentro do jogo sem pular do lugar.' },
+          { id: '02', label: 'Feliz', file: '02_feliz.png', line: 'Que ótimo! Os recortes ficaram super limpos e prontos para o nosso projeto social!' },
+          { id: '03', label: 'Triste', file: '03_triste.png', line: 'Poxa... às vezes as coisas ficam difíceis, mas não podemos desistir agora.' },
+          { id: '04', label: 'Brava', file: '04_brava.png', line: 'Não vou deixar que isso aconteça. Precisamos agir com firmeza!' },
+          { id: '05', label: 'Surpresa', file: '05_surpresa.png', line: 'Espera aí... você está dizendo que conseguimos resolver tudo sem perder nada de qualidade?!' },
+          { id: '06', label: 'Constrangida', file: '06_constrangida.png', line: 'Ah... bom, eu fiz o melhor que pude para ajudar a equipe...' },
+          { id: '07', label: 'Pensativa', file: '07_pensativa.png', line: 'Hmm... se analisarmos por esse lado, qual será a melhor decisão para a próxima fase?' },
+          { id: '08', label: 'Rindo', file: '08_rindo.png', line: 'Hahaha! Essa foi muito boa, valeu demais pela parceria!' },
+          { id: '09', label: 'Com raiva', file: '09_com_raiva.png', line: 'Já chega! Isso passou de todos os limites!' },
+          { id: '10', label: 'Olhando (esq.)', file: '10_olhando_esquerda.png', line: '(Olhando para a esquerda) Parece que tem alguém vindo por ali...' },
+          { id: '11', label: 'Olhando (dir.)', file: '11_olhando_direita.png', line: '(Olhando para a direita) Vamos conferir o que tem daquele lado da cena.' },
+          { id: '12', label: 'De costas', file: '12_de_costas.png', line: '...' }
+        ]
+      }
+    };
+
+    characters.char3 = {
+      name: 'Personagem 3',
+      dir: 'sprites_recortados_3',
+      stdSize: '240×350',
+      fullbodySize: '391×1447',
+      portraitHeight: 350,
+      expressions: characters.char1.expressions
+    };
+    characters.char4 = {
+      name: 'Personagem 4',
+      dir: 'sprites_recortados_4',
+      stdSize: '240×350',
+      fullbodySize: '419×1494',
+      portraitHeight: 350,
+      expressions: characters.char2.expressions
+    };
+    characters.char5 = {
+      name: 'Personagem 5',
+      dir: 'sprites_recortados_5',
+      stdSize: '240×350',
+      fullbodySize: '384×1499',
+      portraitHeight: 350,
+      expressions: characters.char1.expressions
+    };
+    characters.char6 = {
+      name: 'Personagem 6',
+      dir: 'sprites_recortados_6',
+      stdSize: '240×350',
+      fullbodySize: '376×1480',
+      portraitHeight: 350,
+      expressions: characters.char2.expressions
+    };
+    characters.char7 = {
+      name: 'Personagem 7',
+      dir: 'sprites_recortados_7',
+      stdSize: '240×350',
+      fullbodySize: '382×1504',
+      portraitHeight: 350,
+      expressions: characters.char1.expressions
+    };
+    characters.char8 = {
+      name: 'Personagem 8',
+      dir: 'sprites_recortados_8',
+      stdSize: '240×350',
+      fullbodySize: '375×1467',
+      portraitHeight: 350,
+      expressions: characters.char2.expressions
+    };
+    characters.char9 = {
+      name: 'Personagem 9',
+      dir: 'sprites_recortados_9',
+      stdSize: '240×350',
+      fullbodySize: '384×1494',
+      portraitHeight: 350,
+      expressions: characters.char1.expressions
+    };
+    characters.char10 = {
+      name: 'Personagem 10',
+      dir: 'sprites_recortados_10',
+      stdSize: '240×350',
+      fullbodySize: '373×1483',
+      portraitHeight: 350,
+      expressions: characters.char2.expressions
+    };
+
+    let currentCharKey = 'char10';
+    let currentIndex = 0;
+    let currentBgClass = 'preview-bg-scene';
+    let autoTimer = null;
+
+    const activeImg = document.getElementById('activeExpressionImg');
+    const fullbodyImg = document.getElementById('fullbodyImg');
+    const speakerName = document.getElementById('speakerName');
+    const panelTitle = document.getElementById('panelTitle');
+    const activeBadge = document.getElementById('activeEmotionBadge');
+    const dialogueText = document.getElementById('dialogueText');
+    const btnContainer = document.getElementById('expressionButtons');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const gameStage = document.getElementById('gameStage');
+    const portraitSlot = document.getElementById('portraitSlot');
+    const fullbodyWrap = document.getElementById('fullbodyWrap');
+
+    function selectExpression(index) {
+      const charData = characters[currentCharKey];
+      const exprs = charData.expressions;
+      currentIndex = (index + exprs.length) % exprs.length;
+      const item = exprs[currentIndex];
+      activeImg.src = `${charData.dir}/${item.file}`;
+      activeBadge.textContent = `${item.file} (${charData.stdSize})`;
+      dialogueText.textContent = item.line;
+
+      document.querySelectorAll('.expr-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === currentIndex);
+      });
+    }
+
+    function renderCharacter(charKey) {
+      currentCharKey = charKey;
+      const charData = characters[charKey];
+      speakerName.textContent = charData.name;
+      panelTitle.textContent = `Expressões (${charData.stdSize} px)`;
+      fullbodyImg.src = `${charData.dir}/00_corpo_inteiro.png`;
+      portraitSlot.style.height = `${charData.portraitHeight || 310}px`;
+
+      btnContainer.innerHTML = '';
+      charData.expressions.forEach((expr, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'expr-btn' + (idx === currentIndex ? ' active' : '');
+        btn.innerHTML = `<span class="expr-num">${expr.id}</span><span>${expr.label}</span>`;
+        btn.addEventListener('click', () => selectExpression(idx));
+        btnContainer.appendChild(btn);
+      });
+
+      galleryGrid.innerHTML = '';
+      const allItems = [
+        {
+          label: 'Corpo Inteiro',
+          file: '00_corpo_inteiro.png',
+          size: charData.fullbodySize,
+          isFullbody: true
+        },
+        ...charData.expressions.map(e => ({ ...e, size: charData.stdSize }))
+      ];
+
+      allItems.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'sprite-card';
+        card.innerHTML = `
+          <div class="sprite-card-preview ${item.isFullbody ? 'fullbody-preview' : ''} ${currentBgClass}">
+            <img src="${charData.dir}/${item.file}" alt="${item.label}" />
+          </div>
+          <div class="sprite-card-info">
+            <code>${item.file}</code>
+            <span>${item.size}</span>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          if (item.isFullbody) {
+            document.getElementById('toggleFullbody').checked = true;
+            fullbodyWrap.style.opacity = '1';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            selectExpression(idx - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+        galleryGrid.appendChild(card);
+      });
+
+      selectExpression(currentIndex);
+    }
+
+    // Alternar personagem
+    document.querySelectorAll('[data-char]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const charKey = btn.getAttribute('data-char');
+        document.querySelectorAll('[data-char]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCharacter(charKey);
+      });
+    });
+
+    // Alternar fundo
+    document.querySelectorAll('[data-bg]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newBg = btn.getAttribute('data-bg');
+        gameStage.classList.remove(currentBgClass);
+        gameStage.classList.add(newBg);
+
+        document.querySelectorAll('.sprite-card-preview').forEach(p => {
+          p.classList.remove(currentBgClass);
+          p.classList.add(newBg);
+        });
+
+        currentBgClass = newBg;
+        document.querySelectorAll('[data-bg]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Checkboxes de opções
+    document.getElementById('toggleFullbody').addEventListener('change', (e) => {
+      fullbodyWrap.style.opacity = e.target.checked ? '1' : '0';
+    });
+
+    document.getElementById('toggleGuides').addEventListener('change', (e) => {
+      portraitSlot.classList.toggle('show-guides', e.target.checked);
+    });
+
+    document.getElementById('toggleAutoCycle').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        autoTimer = setInterval(() => selectExpression(currentIndex + 1), 1200);
+      } else {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    });
+
+    // Atalhos de teclado (Setas Esquerda/Direita)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        selectExpression(currentIndex + 1);
+      } else if (e.key === 'ArrowLeft') {
+        selectExpression(currentIndex - 1);
+      }
+    });
+
+    renderCharacter('char10');
+  </script>
+</body>
+</html>

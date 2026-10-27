@@ -1,0 +1,13 @@
+# Dependencies and local build artifacts
+game/node_modules/
+game/dist/
+game/.build-check/
+game/.edge-profile/
+
+# Local configuration and caches
+*.local
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]

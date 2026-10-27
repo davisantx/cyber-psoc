@@ -1,0 +1,4 @@
+export default {
+  base: './',
+  esbuild: { jsx: 'automatic' },
+};
