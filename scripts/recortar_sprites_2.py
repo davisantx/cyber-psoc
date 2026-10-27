@@ -1,13 +1,15 @@
-import os
+from pathlib import Path
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-im = Image.open('Ficha de Personagem_ Expressões e Vistas.png').convert('RGBA')
-arr = np.array(im)
+ROOT = Path(__file__).resolve().parents[1]
+SHEET_PATH = ROOT / "artes" / "fichas_originais" / "Ficha de Personagem_ Expressões e Vistas.png"
+out_dir = ROOT / "artes" / "sprites_recortados" / "sprites_recortados_2"
+out_dir.mkdir(parents=True, exist_ok=True)
 
-out_dir = 'sprites_recortados_2'
-os.makedirs(out_dir, exist_ok=True)
+im = Image.open(SHEET_PATH).convert('RGBA')
+arr = np.array(im)
 
 def clean_patch_rgba(patch, hair_limit):
     out = patch.copy()

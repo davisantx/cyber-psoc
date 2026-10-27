@@ -10,7 +10,9 @@ from PIL import Image
 from scipy import ndimage
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
+SHEETS_DIR = ROOT / "artes" / "fichas_originais"
+OUTPUT_DIR = ROOT / "artes" / "sprites_recortados"
 SHEETS = (
     ("Ficha de Personagem 3 - Fundo Transparente.png", "sprites_recortados_3", False),
     ("Ficha de Personagem 4 - Brasileira - Fundo Transparente.png", "sprites_recortados_4", True),
@@ -35,7 +37,7 @@ NAMES_FEMALE = (
 
 
 def crop_sheet(source_name: str, output_name: str, female: bool) -> None:
-    source = np.array(Image.open(ROOT / source_name).convert("RGBA"))
+    source = np.array(Image.open(SHEETS_DIR / source_name).convert("RGBA"))
     alpha = source[:, :, 3]
 
     # As 13 figuras grandes formam componentes separados. O limiar alto ignora
@@ -69,7 +71,7 @@ def crop_sheet(source_name: str, output_name: str, female: bool) -> None:
         cores == 0, return_indices=True
     )
     owners = cores[tuple(nearest_indices)]
-    output_dir = ROOT / output_name
+    output_dir = OUTPUT_DIR / output_name
     output_dir.mkdir(exist_ok=True)
     names = NAMES_FEMALE if female else NAMES_MALE
 

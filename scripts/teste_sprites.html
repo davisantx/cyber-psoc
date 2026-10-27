@@ -455,12 +455,12 @@
       <!-- Palco do jogo -->
       <div id="gameStage" class="game-stage preview-bg-scene">
         <div id="fullbodyWrap" class="stage-fullbody-wrap">
-          <img id="fullbodyImg" src="sprites_recortados_10/00_corpo_inteiro.png" alt="Personagem Corpo Inteiro" />
+          <img id="fullbodyImg" src="../artes/sprites_recortados/sprites_recortados_10/00_corpo_inteiro.png" alt="Personagem Corpo Inteiro" />
         </div>
 
         <div class="vn-hud">
           <div id="portraitSlot" class="portrait-slot">
-            <img id="activeExpressionImg" src="sprites_recortados_10/01_normal.png" alt="Expressão Atual" />
+            <img id="activeExpressionImg" src="../artes/sprites_recortados/sprites_recortados_10/01_normal.png" alt="Expressão Atual" />
           </div>
           <div class="dialogue-box">
             <div>
@@ -638,7 +638,7 @@
       const exprs = charData.expressions;
       currentIndex = (index + exprs.length) % exprs.length;
       const item = exprs[currentIndex];
-      activeImg.src = `${charData.dir}/${item.file}`;
+      activeImg.src = `../artes/sprites_recortados/${charData.dir}/${item.file}`;
       activeBadge.textContent = `${item.file} (${charData.stdSize})`;
       dialogueText.textContent = item.line;
 
@@ -652,7 +652,7 @@
       const charData = characters[charKey];
       speakerName.textContent = charData.name;
       panelTitle.textContent = `Expressões (${charData.stdSize} px)`;
-      fullbodyImg.src = `${charData.dir}/00_corpo_inteiro.png`;
+      fullbodyImg.src = `../artes/sprites_recortados/${charData.dir}/00_corpo_inteiro.png`;
       portraitSlot.style.height = `${charData.portraitHeight || 310}px`;
 
       btnContainer.innerHTML = '';
@@ -680,7 +680,7 @@
         card.className = 'sprite-card';
         card.innerHTML = `
           <div class="sprite-card-preview ${item.isFullbody ? 'fullbody-preview' : ''} ${currentBgClass}">
-            <img src="${charData.dir}/${item.file}" alt="${item.label}" />
+            <img src="../artes/sprites_recortados/${charData.dir}/${item.file}" alt="${item.label}" />
           </div>
           <div class="sprite-card-info">
             <code>${item.file}</code>
