@@ -161,5 +161,3 @@ WARDLE, Claire; DERAKHSHAN, Hossein. Information Disorder: Toward an interdiscip
 SUBRAMANIAN, Bhargav. The Macedonian Fake News Industry and the 2016 US Election. ResearchGate, [S. l.], ago. 2020. Disponível em: https://www.researchgate.net/publication/343860333_The_Macedonian_Fake_News_Industry_and_the_2016_US_Election. Acesso em: 20 set. 2026.
 
 COMO o termo 'fake news' virou arma nos dois lados da batalha política mundial. G1, [S. l.], 15 nov. 2018. Mundo. Disponível em: https://g1.globo.com/mundo/noticia/como-o-termo-fake-news-virou-arma-nos-dois-lados-da-batalha-politica-mundial.ghtml. Acesso em: 20 set. 2026.
-# cyber-psoc
-# cyber-psoc
